@@ -1,0 +1,14 @@
+{
+  "name": "west-skills",
+  "description": "HiroakiWest の Claude Code 用スキル集",
+  "owner": {
+    "name": "HiroakiWest"
+  },
+  "plugins": [
+    {
+      "name": "west",
+      "description": "HiroakiWest の汎用スキル集",
+      "source": "./"
+    }
+  ]
+}

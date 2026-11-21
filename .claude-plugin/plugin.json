@@ -1,0 +1,10 @@
+{
+  "name": "west",
+  "description": "HiroakiWest の汎用スキル集",
+  "author": {
+    "name": "HiroakiWest"
+  },
+  "homepage": "https://github.com/HiroakiWest/claude-skills",
+  "repository": "https://github.com/HiroakiWest/claude-skills",
+  "license": "MIT"
+}
