@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# addyosmani/agent-skills から、superpowers・Claude Code 組み込みコマンド・
-# context7・ponytail と機能が重ならない部分だけを plugins/agent-skills/ に取り込む。
+# addyosmani/agent-skills から、Claude Code 組み込みコマンド・context7・ponytail と
+# 機能が重ならず、毎回のトークン消費が小さい部分だけを plugins/agent-skills/ に取り込む。
 #
 # 使い方: scripts/sync-agent-skills.sh [ref]   (ref の既定は main)
 # 取り込み後に git diff で差分を確認してからコミットする。
@@ -17,6 +17,7 @@ SKILLS=(
   ci-cd-and-automation
   constraint-driven-development
   context-engineering
+  debugging-and-error-recovery
   deprecation-and-migration
   documentation-and-adrs
   frontend-ui-engineering
@@ -24,15 +25,17 @@ SKILLS=(
   performance-optimization
   security-and-hardening
   shipping-and-launch
+  spec-driven-development
+  planning-and-task-breakdown
+  test-driven-development
 )
 AGENTS=(accessibility-auditor web-performance-auditor)
 COMMANDS=(a11y webperf constraints)
 
 # 重複のため取り込まないもの(理由は README.md の表を参照)
 SKIPPED=(
-  spec-driven-development idea-refine interview-me
-  planning-and-task-breakdown incremental-implementation
-  test-driven-development debugging-and-error-recovery
+  idea-refine interview-me
+  incremental-implementation
   code-review-and-quality doubt-driven-development code-simplification
   git-workflow-and-versioning source-driven-development
   browser-testing-with-devtools using-agent-skills

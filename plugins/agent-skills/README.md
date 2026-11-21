@@ -1,7 +1,7 @@
 # agent-skills(抜粋版)
 
 [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)(MIT License)から、
-superpowers・Claude Code 組み込みコマンド・context7・ponytail と機能が重ならない部分だけを
+Claude Code 組み込みコマンド・context7・ponytail と機能が重ならず、トークン消費の小さい部分だけを
 取り込んだものです。取り込んだ upstream のコミットは `UPSTREAM` に記録しています。
 ファイルの中身は upstream のまま変更していません。著作権表示は `LICENSE` のとおりです。
 

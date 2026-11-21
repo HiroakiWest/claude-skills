@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "description": "addyosmani/agent-skills のうち superpowers・組み込みコマンドと重ならない部分(アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など)",
+  "description": "addyosmani/agent-skills から、組み込みコマンドと重ならずトークン消費の小さい部分(仕様・計画・TDD・デバッグ、アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など)",
   "author": {
     "name": "Addy Osmani",
     "url": "https://github.com/addyosmani"

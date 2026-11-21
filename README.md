@@ -6,20 +6,22 @@ HiroakiWest の Claude Code 用スキル集です。このリポジトリ自体�
 | プラグイン | 内容 | 取得元 |
 |---|---|---|
 | `west` | 自作スキル(今は動作確認用の `/west:check` だけ) | このリポジトリ |
-| `agent-skills` | アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) から重複しない部分だけ取り込み(`plugins/agent-skills/`) |
+| `agent-skills` | 仕様・計画・TDD・デバッグ、アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) から一部だけ取り込み(`plugins/agent-skills/`) |
 | `ponytail` | 最小限の変更で済ませる「lazy senior dev」モード、レビュー・監査 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)(v5.3.3 のコミットに固定) |
 | `context7` | ライブラリの最新ドキュメントを引く MCP サーバ | [upstash/context7](https://github.com/upstash/context7)(コミットに固定) |
 
-[graphify](https://github.com/safishamsi/graphify) はプラグイン形式で配布されていないので、
-下の「graphify(別途インストール)」の手順で入れます。
+あわせて、公式マーケットプレイス(`claude-plugins-official`)の `hookify` と `security-guidance` も入れます。
+[graphify](https://github.com/safishamsi/graphify) はプラグイン形式で配布されていないので、別の手順で入れます。
+
+選ぶ基準は「機能が重ならないこと」と「トークンを無駄に使わないこと」です。測った結果は
+下の「トークン消費の目安」にあります。
 
 ## 前提
 
 - Claude Code 2.1 系の新しめの版
-- 一緒に使う前提のプラグイン: `superpowers@claude-plugins-official`
-  (公式マーケットプレイスにあるので、ここには載せていません)
 - ponytail を使うホスト: Node.js が PATH にあること(フックが Node で動きます)
-- graphify を使うホスト: Python 3.11.5〜3.14 と [uv](https://docs.astral.sh/uv/)(または pipx)
+- hookify・security-guidance を使うホスト: python3
+- graphify を使うホスト: [uv](https://docs.astral.sh/uv/)(Python 3.11.5 以上が無ければ uv が自動で用意します)
 
 ## インストール(ホストごとに1回)
 
@@ -31,7 +33,8 @@ Claude Code の中で、**1行ずつ別々に**送ってください(まとめ�
 /plugin install agent-skills@west-skills
 /plugin install ponytail@west-skills
 /plugin install context7@west-skills
-/plugin install superpowers@claude-plugins-official
+/plugin install hookify@claude-plugins-official
+/plugin install security-guidance@claude-plugins-official
 ```
 
 シェルからでも同じことができます。
@@ -39,7 +42,14 @@ Claude Code の中で、**1行ずつ別々に**送ってください(まとめ�
 ```
 claude plugin marketplace add HiroakiWest/claude-skills
 for p in west agent-skills ponytail context7; do claude plugin install "$p@west-skills"; done
-claude plugin install superpowers@claude-plugins-official
+for p in hookify security-guidance; do claude plugin install "$p@claude-plugins-official"; done
+```
+
+security-guidance の LLM レビューは切っておきます(理由は下の「トークン消費の目安」)。
+`~/.claude/settings.json` に次を足してください(`env` がすでにあれば、その中に1行足します)。
+
+```json
+"env": { "ENABLE_CODE_SECURITY_REVIEW": "0" }
 ```
 
 入れ終わったら Claude Code を起動し直して、`/west:check` で確認します
@@ -78,6 +88,31 @@ graphify install              # Claude Code 用のスキルを登録
   ```
 - graphify は `uv tool upgrade graphifyy` のあと `graphify install` をもう一度実行します。
 
+## トークン消費の目安
+
+1セッションあたりの概算です(2026-11 時点)。「常時」はスキルやエージェントの説明文です。
+「差し込み」は、フックがセッション開始時などに会話へ足す文章です。`claude plugin details` は
+フックの差し込みを数えないので、フックを実際に動かして測りました。
+
+| プラグイン | 常時 | 差し込み | 使ったときだけかかるもの |
+|---|---|---|---|
+| west | ほぼ 0 | 0 | — |
+| agent-skills | 約1,900 | 0 | 該当する作業で本文を読み込む(1回 2〜5千) |
+| ponytail | 約430 | 開始時 約1,360、サブエージェント起動ごとに 約750 | 返答と変更を短くする方向に働く(作者の計測ではコスト -42〜75%、自己申告) |
+| context7 | ほぼ 0(ツールは使うときに読み込み) | 0 | 問い合わせごとにドキュメント数千 |
+| hookify | 約220 | 0(自分で作ったルールに一致したときだけ) | ルール作成時 |
+| security-guidance(LLM レビュー切り) | 0 | 危険なパターンに一致したときの警告文だけ | — |
+| graphify | 約150 | 0 | `/graphify` 実行時(コード以外の解析は LLM を使うので重い) |
+
+### 評価して入れなかったもの
+
+| プラグイン | 理由 |
+|---|---|
+| superpowers | 常時 約700+開始時の差し込み 約900。さらに「設計 → 計画 → サブエージェントで実装 → レビュー2回」の手順を毎回踏ませるので、総トークンが数倍になりやすい。最小限にする ponytail とも方針が逆。必要な手順(仕様・計画・TDD・デバッグ)は agent-skills で代わりにする |
+| security-guidance の LLM レビュー(既定) | 毎ターンの終わりに Opus で diff をレビューし、コミットのたびにエージェントでもレビューする。実測では41回で入力 約50万トークン(1回で入力 8.6万・出力 27 の回もあった)。`ENABLE_CODE_SECURITY_REVIEW=0` で切り、パターン警告だけ残す。必要なときは組み込みの `/security-review` を使う |
+| claude-security | 常時 約610(エージェント9個分の説明文)。スキャンは複数エージェントで非常に重い。組み込みの `/security-review` と役割が重なる |
+| explanatory-output-style | 開始時に 約330 を差し込み、毎回の返答に解説ブロックを付けさせる。出力を増やすこと自体が目的の機能 |
+
 ## 注意点
 
 ### 同じものを二重に入れない
@@ -95,23 +130,22 @@ graphify install              # Claude Code 用のスキルを登録
 
 ### agent-skills で取り込んでいないもの
 
-次のスキル・コマンド・エージェントは、superpowers・Claude Code 組み込みコマンド・context7・ponytail と
-役割が重なるので取り込んでいません。代わりに右の欄のものを使います。
+次のスキル・コマンド・エージェントは、Claude Code 組み込みコマンド・context7・ponytail と役割が重なるか、
+発火しすぎてトークンを食うので取り込んでいません。代わりに右の欄のものを使います。
 
-| 取り込んでいないもの | 代わりに使うもの |
+| 取り込んでいないもの | 理由・代わりに使うもの |
 |---|---|
-| spec-driven-development, idea-refine, interview-me, `/spec` | `superpowers:brainstorming` |
-| planning-and-task-breakdown, `/plan` | `superpowers:writing-plans` |
-| incremental-implementation, `/build` | `superpowers:executing-plans`, `superpowers:subagent-driven-development` |
-| test-driven-development, `/test`, test-engineer | `superpowers:test-driven-development` |
-| debugging-and-error-recovery | `superpowers:systematic-debugging` |
-| code-review-and-quality, doubt-driven-development, `/review`, code-reviewer | `/code-review`, `superpowers:requesting-code-review`, `/ponytail-review` |
-| code-simplification, `/code-simplify` | `/simplify`, ponytail |
-| git-workflow-and-versioning | `superpowers:using-git-worktrees`, `superpowers:finishing-a-development-branch` |
+| idea-refine, interview-me | `spec-driven-development` と役割が重なる |
+| incremental-implementation | 「複数ファイルに触れる変更すべて」で発火して毎回 約2,400 を読み込む。小さく進めるのは ponytail が担う |
+| git-workflow-and-versioning | 「あらゆるコード変更」で発火して毎回 約3,600 を読み込む |
+| code-review-and-quality, doubt-driven-development, `/review`, code-reviewer | `/code-review`、`/ponytail-review` |
+| code-simplification, `/code-simplify` | `/simplify`、ponytail |
 | source-driven-development | context7 |
 | browser-testing-with-devtools | Claude in Chrome(Chrome DevTools MCP 前提のため) |
-| using-agent-skills | `superpowers:using-superpowers`(起動時にスキルを振り分ける役が二重になるため) |
-| `/ship`, security-auditor | `/code-review` と `/security-review`(`shipping-and-launch` スキル自体は収録) |
+| using-agent-skills | スキルの振り分け役。無くても各スキルは説明文で発火する |
+| `/spec`, `/plan`, `/build`, `/test`, `/ship`, test-engineer, security-auditor | スキル本体だけで足りる。`/ship` の代わりは `/code-review` と `/security-review` |
+
+`test-driven-development` は「ロジックを書くとき全般」で発火する書き方なので、読み込みが多すぎるようなら外します。
 
 取り込み直すときは `scripts/sync-agent-skills.sh [ref]` を実行します。upstream に新しいスキルが
 増えていると「未分類の新しいスキル」と表示されるので、スクリプト先頭の一覧のどちらかに足してください。
@@ -119,7 +153,6 @@ graphify install              # Claude Code 用のスキルを登録
 ### ponytail は常時オン
 
 - 既定で毎セッション `full` モードが自動で有効になり、「最小限の変更」を強く促します。
-  superpowers は「設計 → 計画 → 実装」の手順を踏ませるので、大きな機能追加では方針がぶつかることがあります。
   - その場だけ止める: 「stop ponytail」と言うか `/ponytail off`
   - 既定を弱める: `~/.config/ponytail/config.json` に `{ "defaultMode": "lite" }`、
     または環境変数 `PONYTAIL_DEFAULT_MODE=lite`
@@ -145,7 +178,6 @@ graphify install              # Claude Code 用のスキルを登録
   `--strict` を付けると、graph を調べる前の Read・Grep が拒否されるようになります。
 - `.claude/settings.json` を git 管理しているプロジェクトでは、このフックもコミットされることに注意してください。
 - グラフは各プロジェクトの `graphify-out/` に出力されます。git に入れない場合は `.gitignore` に足します。
-- コード以外(文書・画像など)の解析には LLM を使うので、トークンを消費します。
 - 外すときは `graphify uninstall`(`--purge` を付けると `graphify-out/` も消えます)。
 
 ### claude.ai 側のスキルとの関係

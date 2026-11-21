@@ -12,7 +12,7 @@
     },
     {
       "name": "agent-skills",
-      "description": "addyosmani/agent-skills の抜粋版。superpowers・組み込みコマンドと重ならないスキルだけを収録",
+      "description": "addyosmani/agent-skills の抜粋版。組み込みコマンドと重ならずトークン消費の小さいスキルだけを収録",
       "source": "./plugins/agent-skills"
     },
     {
