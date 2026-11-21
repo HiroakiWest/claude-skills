@@ -17,21 +17,24 @@
     },
     {
       "name": "ponytail",
-      "description": "最小限の変更で済ませる「lazy senior dev」モード(DietrichGebert/ponytail、v5.3.3 に固定)",
+      "description": "最小限の変更で済ませる「lazy senior dev」モード(DietrichGebert/ponytail、v5.3.3 のコミットに固定)",
       "source": {
         "source": "github",
         "repo": "DietrichGebert/ponytail",
-        "ref": "v5.3.3"
+        "ref": "v5.3.3",
+        "sha": "7801d061243d7b753bad0e0b3c057cd250b11755"
       },
       "homepage": "https://github.com/DietrichGebert/ponytail"
     },
     {
       "name": "context7",
-      "description": "ライブラリの最新ドキュメントを引く Context7 MCP サーバ(upstash/context7)",
+      "description": "ライブラリの最新ドキュメントを引く Context7 MCP サーバ(upstash/context7、コミット固定)",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/upstash/context7.git",
-        "path": "plugins/claude/context7"
+        "path": "plugins/claude/context7",
+        "ref": "master",
+        "sha": "b1e3611e32a8b1369ae526cacdf335ddfd6e5fbb"
       },
       "homepage": "https://context7.com"
     }

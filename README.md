@@ -7,8 +7,8 @@ HiroakiWest の Claude Code 用スキル集です。このリポジトリ自体�
 |---|---|---|
 | `west` | 自作スキル(今は動作確認用の `/west:check` だけ) | このリポジトリ |
 | `agent-skills` | アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) から重複しない部分だけ取り込み(`plugins/agent-skills/`) |
-| `ponytail` | 最小限の変更で済ませる「lazy senior dev」モード、レビュー・監査 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)(v5.3.3 に固定) |
-| `context7` | ライブラリの最新ドキュメントを引く MCP サーバ | [upstash/context7](https://github.com/upstash/context7) |
+| `ponytail` | 最小限の変更で済ませる「lazy senior dev」モード、レビュー・監査 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)(v5.3.3 のコミットに固定) |
+| `context7` | ライブラリの最新ドキュメントを引く MCP サーバ | [upstash/context7](https://github.com/upstash/context7)(コミットに固定) |
 
 [graphify](https://github.com/safishamsi/graphify) はプラグイン形式で配布されていないので、
 下の「graphify(別途インストール)」の手順で入れます。
@@ -49,10 +49,12 @@ claude plugin install superpowers@claude-plugins-official
 
 ```
 uv tool install graphifyy     # パッケージ名は y が2つ。コマンド名は graphify
-graphify install              # Claude Code 用のスキルとフックを登録
+graphify install              # Claude Code 用のスキルを登録
 ```
 
 使うときは、プロジェクトのディレクトリで `/graphify .` と打ちます。
+特定のプロジェクトで常に graph を使わせたい場合は、そのディレクトリで `graphify claude install` も実行します
+(下の「graphify はグローバル設定を書き換える」を参照)。
 
 ## 更新
 
@@ -66,8 +68,14 @@ graphify install              # Claude Code 用のスキルとフックを登録
   `/plugin` → Marketplaces → `west-skills` で自動更新を有効にします。
 - `west` と `agent-skills` には version を書いていません。そのため、このリポジトリに push するたびに
   新しい版として扱われます。
-- `ponytail` は ref(タグ)で版を固定しています。上げるときは `marketplace.json` の `ref` を書き換えて push します。
-- `context7` は upstream の main を追従します。
+- `ponytail` と `context7` は、外部リポジトリをコミット SHA で固定しています。タグは後から付け替えられるので、
+  `ref` だけでなく `sha` も指定しています。版を上げるときは、upstream の変更内容を確認してから、
+  `marketplace.json` の `ref` と `sha` を書き換えて push します。SHA は次のコマンドで確認できます。
+
+  ```
+  git ls-remote https://github.com/DietrichGebert/ponytail.git refs/tags/<タグ>
+  git ls-remote https://github.com/upstash/context7.git refs/heads/master
+  ```
 - graphify は `uv tool upgrade graphifyy` のあと `graphify install` をもう一度実行します。
 
 ## 注意点
@@ -130,9 +138,12 @@ graphify install              # Claude Code 用のスキルとフックを登録
 
 ### graphify はグローバル設定を書き換える
 
-- `graphify install` を実行すると、`~/.claude/CLAUDE.md` に案内文が追記され、`~/.claude/settings.json` に
-  フック(Glob/Grep の前に graph を使うよう促す)が追加されます。
-- 一部のプロジェクトだけで使いたい場合は、そのディレクトリで `graphify install --project` を使います。
+- `graphify install` を実行すると、`~/.claude/skills/graphify/` が作られ、`~/.claude/CLAUDE.md` に
+  `/graphify` の呼び出し方が追記されます(ファイルがなければ新規作成)。`~/.claude/settings.json` は変更されません。
+- プロジェクトのディレクトリで `graphify claude install` を実行すると、そのプロジェクトの `CLAUDE.md` に節が追加されます。
+  さらに `.claude/settings.json` に、Grep・Read・Glob の前に graph を使うよう促すフックが登録されます。
+  `--strict` を付けると、graph を調べる前の Read・Grep が拒否されるようになります。
+- `.claude/settings.json` を git 管理しているプロジェクトでは、このフックもコミットされることに注意してください。
 - グラフは各プロジェクトの `graphify-out/` に出力されます。git に入れない場合は `.gitignore` に足します。
 - コード以外(文書・画像など)の解析には LLM を使うので、トークンを消費します。
 - 外すときは `graphify uninstall`(`--purge` を付けると `graphify-out/` も消えます)。
