@@ -1,14 +1,39 @@
 {
   "name": "west-skills",
-  "description": "HiroakiWest の Claude Code 用スキル集",
+  "description": "HiroakiWest の Claude Code 用スキル集(自作スキル+厳選した外部プラグイン)",
   "owner": {
     "name": "HiroakiWest"
   },
   "plugins": [
     {
       "name": "west",
-      "description": "HiroakiWest の汎用スキル集",
+      "description": "HiroakiWest の自作スキル集",
       "source": "./"
+    },
+    {
+      "name": "agent-skills",
+      "description": "addyosmani/agent-skills の抜粋版。superpowers・組み込みコマンドと重ならないスキルだけを収録",
+      "source": "./plugins/agent-skills"
+    },
+    {
+      "name": "ponytail",
+      "description": "最小限の変更で済ませる「lazy senior dev」モード(DietrichGebert/ponytail、v5.3.3 に固定)",
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail",
+        "ref": "v5.3.3"
+      },
+      "homepage": "https://github.com/DietrichGebert/ponytail"
+    },
+    {
+      "name": "context7",
+      "description": "ライブラリの最新ドキュメントを引く Context7 MCP サーバ(upstash/context7)",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/upstash/context7.git",
+        "path": "plugins/claude/context7"
+      },
+      "homepage": "https://context7.com"
     }
   ]
 }

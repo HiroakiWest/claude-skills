@@ -1,0 +1,11 @@
+{
+  "name": "agent-skills",
+  "description": "addyosmani/agent-skills のうち superpowers・組み込みコマンドと重ならない部分(アクセシビリティ、API設計、CI/CD、性能、可観測性、セキュリティ設計、リリース準備など)",
+  "author": {
+    "name": "Addy Osmani",
+    "url": "https://github.com/addyosmani"
+  },
+  "homepage": "https://github.com/addyosmani/agent-skills",
+  "repository": "https://github.com/HiroakiWest/claude-skills",
+  "license": "MIT"
+}
